@@ -20,32 +20,23 @@ import net.minecraft.util.*;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.fluids.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
  * Created by user on 2016/5/28.
  */
-public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluidHandler{
-    protected FluidTank fluidTank=new FluidTank(1000*8);
-    private BasicSink ic2EnergySink = new BasicSink(this,Integer.MAX_VALUE,5);
+public class TEAccMain extends TileEntity implements ITickable,IInventory{
+    //protected FluidTank fluidTank=new FluidTank(1000*8);
+    //private BasicSink ic2EnergySink = new BasicSink(this,Integer.MAX_VALUE,5);
     public static final int SLOTS_COUNT=1;
     public int dir=0;
     private ItemStack[] itemStacks = new ItemStack[SLOTS_COUNT];
     public boolean isScanning=false;
     public boolean isOn=false;
     public int notifyRefresh=0;
-    @Override
-    public void invalidate() {
-        ic2EnergySink.invalidate();
-        super.invalidate();
-    }
-
-    @Override
-    public void onChunkUnload() {
-        ic2EnergySink.onChunkUnload();
-        super.onChunkUnload();
-    }
 
     @Override
     public int getSizeInventory() {
@@ -143,13 +134,30 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
     public void clear() {
         Arrays.fill(itemStacks, null);
     }
-    private int time= new Random().nextInt(5);
+    private int time= 0;
     private static final double EUperUU=100000;
-    private BlockPos posScanning=null;
-    private int dirScanning=-1;
-    private final Vec3i[] dirVec={new Vec3i(0,0,1),new Vec3i(0,0,-1),new Vec3i(1,0,0),new Vec3i(-1,0,0)};
+    private BlockPos posScanning=pos;
+    private int dirScanning=dir;
+    private static final Vec3i[] dirVec={new Vec3i(0,0,1),new Vec3i(0,0,-1),new Vec3i(1,0,0),new Vec3i(-1,0,0)};
+    private static final int[] dirRight={3,2,0,1};
+    private static final int[] dirLeft={2,3,1,0};
+    private List<BlockPos> hullsPos=new ArrayList<BlockPos>();
+    private List<BlockPos> energyPos=new ArrayList<BlockPos>();
+
+
+
+    public int assemblePercent=-2;
+    private int hullChangei=0;
     @Override
     public void update() {
+        if(assemblePercent==-1){
+            for (BlockPos p:energyPos){
+                TEAccEnergy te=(TEAccEnergy) worldObj.getTileEntity(p);
+                EU_Stored+=te.getEnergy(Integer.MAX_VALUE-EU_Stored);
+            }
+        }
+        //System.out.println(String.valueOf(isOn)+String.valueOf(isScanning)+String.valueOf(assemblePercent));
+        /*
         ic2EnergySink.update();
         if (ic2EnergySink.canUseEnergy(EUperUU)){
             ItemStack item=getStackInSlot(0);
@@ -162,7 +170,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
                     ic2EnergySink.useEnergy(EUperUU);
                     item.stackSize++;
                 }
-            }*/
+            }
             if (fluidTank.getFluid()==null){
                 ic2EnergySink.useEnergy(EUperUU);
                 fluidTank.setFluid(FluidRegistry.getFluidStack("ic2uu_matter",1).copy());
@@ -180,15 +188,24 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
             UU_Stored = fluidTank.getFluidAmount();
         }else {
             //System.out.println(EU_Stored);
-        }
-        if (isScanning && worldObj.getWorldTime()%5==time){
+        }*/
+        if (isScanning && worldObj.getWorldTime()%2==time){
             //do scan
+               if (!worldObj.isRemote) doScan();
+
 
         }
         if (notifyRefresh>0){
             if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+            assemblePercent=0;
+            posScanning=pos.add(dirVec[dir]).add(dirVec[dir]);
+            dirScanning=dir;
+            hullsPos.clear();
+            hullChangei=0;
+            this.hullsPos.clear();
             this.isScanning=true;
-            worldObj.setBlockState(pos.add(dirVec[dir]),AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
+
+            //worldObj.setBlockState(pos.add(dirVec[dir]),AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
             //System.out.println(String.valueOf(isOn));
             notifyRefresh--;
         }
@@ -198,7 +215,132 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
         //time%=20;
         //if (boomshakalaka)worldObj.createExplosion(null,pos.getX(),pos.getY(),pos.getZ(),10,true);
     }
+    private void addtolist(BlockPos p){
+        if (worldObj.getTileEntity(p)==null&&!hullsPos.contains(p))hullsPos.add(p);
+        if (worldObj.getTileEntity(p) instanceof TEAccEnergy&&!energyPos.contains(p)){
+            energyPos.add(p);
+            System.out.println("added energy at "+p.toString());
+        }
+    }
 
+    private boolean isHull(BlockPos p,boolean canBeMachine){
+        return worldObj.getBlockState(p)==AcceleratorMod.proxy.blockAccHull.getDefaultState()||
+                (canBeMachine&&p.equals(pos))||worldObj.getTileEntity(p) instanceof TEAccEnergy;
+    }
+    private void doScan(){
+        if(hullsPos.isEmpty()||!posScanning.equals(pos.add(dirVec[dir]).add(dirVec[dir]))){
+            /*boolean isLeftHull=worldObj.getBlockState(posScanning.add(dirVec[dirLeft[dirScanning]]))==AcceleratorMod.proxy.blockAccHull.getDefaultState()||
+                    posScanning.add(dirVec[dirLeft[dirScanning]]).equals(pos);
+            isLeftHull=isLeftHull&&worldObj.getBlockState(posScanning.add(dirVec[dirLeft[dirScanning]]).up())==AcceleratorMod.proxy.blockAccHull.getDefaultState()&&
+                    worldObj.getBlockState(posScanning.add(dirVec[dirLeft[dirScanning]]).down())==AcceleratorMod.proxy.blockAccHull.getDefaultState();
+            boolean isRightHull=worldObj.getBlockState(posScanning.add(dirVec[dirRight[dirScanning]]))==AcceleratorMod.proxy.blockAccHull.getDefaultState()||
+                    posScanning.add(dirVec[dirRight[dirScanning]]).equals(pos);
+            isRightHull=isRightHull&&worldObj.getBlockState(posScanning.add(dirVec[dirRight[dirScanning]]).up())==AcceleratorMod.proxy.blockAccHull.getDefaultState()&&
+                    worldObj.getBlockState(posScanning.add(dirVec[dirRight[dirScanning]]).down())==AcceleratorMod.proxy.blockAccHull.getDefaultState();
+            boolean isFrontHull=worldObj.getBlockState(posScanning.add(dirVec[dirScanning]))==AcceleratorMod.proxy.blockAccHull.getDefaultState()&&
+                    worldObj.getBlockState(posScanning.add(dirVec[dirScanning]).up())==AcceleratorMod.proxy.blockAccHull.getDefaultState()&&
+                    worldObj.getBlockState(posScanning.add(dirVec[dirScanning]).down())==AcceleratorMod.proxy.blockAccHull.getDefaultState();*/
+            boolean isLeftHull=isHull(posScanning.add(dirVec[dirLeft[dirScanning]]),true)&&
+                    isHull(posScanning.add(dirVec[dirLeft[dirScanning]]).down(),true)&&
+                    isHull(posScanning.add(dirVec[dirLeft[dirScanning]]).up(),true);
+            boolean isRightHull=isHull(posScanning.add(dirVec[dirRight[dirScanning]]),true)&&
+                    isHull(posScanning.add(dirVec[dirRight[dirScanning]]).down(),true)&&
+                    isHull(posScanning.add(dirVec[dirRight[dirScanning]]).up(),true);
+            boolean isFrontHull=isHull(posScanning.add(dirVec[dirScanning]),true)&&
+                    isHull(posScanning.add(dirVec[dirScanning]).up(),true)&&
+                    isHull(posScanning.add(dirVec[dirScanning]).down(),true);
+            if(isHull(posScanning.up(),false)&&
+                    isHull(posScanning.down(),false)){
+                //worldObj.setBlockState(posScanning,AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
+                if(isLeftHull&&isRightHull&&!isFrontHull){
+                    addtolist(posScanning.up());
+                    addtolist(posScanning.down());
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]).down());
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]).down());
+                    posScanning=posScanning.add(dirVec[dirScanning]);
+                    return;
+                }
+
+
+                if(isLeftHull&&isFrontHull&&worldObj.isAirBlock(posScanning.add(dirVec[dirRight[dirScanning]]))){
+                    addtolist(posScanning.up());
+                    addtolist(posScanning.down());
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirScanning]));
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirLeft[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirScanning]).up());
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirLeft[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirLeft[dirScanning]]).down());
+                    addtolist(posScanning.add(dirVec[dirScanning]).down());
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirLeft[dirScanning]]).down());
+                    dirScanning=dirRight[dirScanning];
+                    //System.out.println("turning right");
+                    posScanning=posScanning.add(dirVec[dirScanning]);
+                    return;
+                }
+                if(isRightHull&&isFrontHull&&worldObj.isAirBlock(posScanning.add(dirVec[dirLeft[dirScanning]]))){
+                    addtolist(posScanning.up());
+                    addtolist(posScanning.down());
+                    addtolist(posScanning.add(dirVec[dirScanning]));
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirRight[dirScanning]]));
+                    addtolist(posScanning.add(dirVec[dirScanning]).up());
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirRight[dirScanning]]).up());
+                    addtolist(posScanning.add(dirVec[dirScanning]).down());
+                    addtolist(posScanning.add(dirVec[dirRight[dirScanning]]).down());
+                    addtolist(posScanning.add(dirVec[dirScanning]).add(dirVec[dirRight[dirScanning]]).down());
+                    dirScanning=dirLeft[dirScanning];
+                    //System.out.println("turning left");
+                    posScanning=posScanning.add(dirVec[dirScanning]);
+                    return;
+                }
+            }
+        }else {
+        //System.out.println("scan finished");
+        //System.out.println("result:"+hullsPos.toString());
+        if (posScanning.equals(pos.add(dirVec[dir]).add(dirVec[dir]))&& hullsPos.size()>0){
+            if(hullChangei==0) {
+                for (BlockPos p:energyPos) {
+                    TEAccEnergy te= (TEAccEnergy) worldObj.getTileEntity(p);
+                    te.isOn=true;
+                    worldObj.markBlockForUpdate(p);
+                }
+            }
+            if(worldObj.getBlockState(hullsPos.get(hullChangei*97%hullsPos.size()))==AcceleratorMod.proxy.blockAccHull.getDefaultState()) {
+                worldObj.setBlockState(hullsPos.get(hullChangei * 97 % hullsPos.size()), AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
+                assemblePercent=Math.round(hullChangei*100/hullsPos.size());
+            }else {
+                isOn=true;
+                isScanning=false;
+                if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+                assemblePercent=-3;
+                return;
+            }
+
+            hullChangei++;
+            if (hullChangei==hullsPos.size()){
+                isScanning=false;
+                assemblePercent=-1;
+                System.out.println("finished");
+            }
+        }else{
+            System.out.println("-2.ison=false,line327");
+            System.out.println(String.valueOf(isScanning));
+            isOn=false;
+            isScanning=false;
+            if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+            assemblePercent=-2;
+        }
+        }
+
+
+    }
     @Override
     public String getName() {
         return "container.AccMain.name";
@@ -213,7 +355,20 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
     public IChatComponent getDisplayName() {
         return this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName());
     }
-
+    private int[] posListtoArr(List<BlockPos> posList){
+        int[] arr=new int[posList.size()*3];
+        for(int i=0;i<posList.size();i++){
+            arr[i*3]=posList.get(i).getX();
+            arr[i*3+1]=posList.get(i).getY();
+            arr[i*3+2]=posList.get(i).getZ();
+        }
+        return arr;
+    }
+    private List<BlockPos> arrtoPosList(int[] arr){
+        List<BlockPos> posList=new ArrayList<BlockPos>();
+        for(int i=0;i<arr.length/3;i++)posList.add(new BlockPos(arr[i*3],arr[i*3+1],arr[i*3+2]));
+        return posList;
+    }
     @Override
     public void writeToNBT(NBTTagCompound parentNBTTagCompound)
     {
@@ -241,14 +396,22 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
         parentNBTTagCompound.setInteger("dir", dir);
         parentNBTTagCompound.setBoolean("on",isOn);
         parentNBTTagCompound.setBoolean("scanning",isScanning);
-        //parentNBTTagCompound.setInteger("EU",EU_Stored);
+        parentNBTTagCompound.setInteger("posscanningx",posScanning.getX());
+        parentNBTTagCompound.setInteger("posscanningy",posScanning.getY());
+        parentNBTTagCompound.setInteger("posscanningz",posScanning.getZ());
+        parentNBTTagCompound.setInteger("dirscanning",dirScanning);
+        parentNBTTagCompound.setInteger("hullchangei",hullChangei);
+        parentNBTTagCompound.setInteger("assemblepercent",assemblePercent);
+        parentNBTTagCompound.setIntArray("hullspos",posListtoArr(hullsPos));
+        parentNBTTagCompound.setIntArray("energypos",posListtoArr(energyPos));
+        parentNBTTagCompound.setInteger("EU",EU_Stored);
         //parentNBTTagCompound.setBoolean("boom", boomshakalaka);
         //parentNBTTagCompound.setTag("burnTimeRemaining", new NBTTagIntArray(burnTimeRemaining));
         //parentNBTTagCompound.setTag("burnTimeInitial", new NBTTagIntArray(burnTimeInitialValue));
-        ic2EnergySink.writeToNBT(parentNBTTagCompound);
-        NBTTagCompound fluidTankTag = new NBTTagCompound();
-        this.fluidTank.writeToNBT(fluidTankTag);
-        parentNBTTagCompound.setTag("fluidTank", fluidTankTag);
+        //ic2EnergySink.writeToNBT(parentNBTTagCompound);
+        //NBTTagCompound fluidTankTag = new NBTTagCompound();
+        //this.fluidTank.writeToNBT(fluidTankTag);
+        //parentNBTTagCompound.setTag("fluidTank", fluidTankTag);
     }
 
     // This is where you load the data that you saved in writeToNBT
@@ -272,11 +435,16 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
         dir=nbtTagCompound.getInteger("dir");
         isScanning=nbtTagCompound.getBoolean("scanning");
         isOn=nbtTagCompound.getBoolean("on");
-
-        ic2EnergySink.readFromNBT(nbtTagCompound);
-        super.readFromNBT(nbtTagCompound);
-        this.fluidTank.readFromNBT(nbtTagCompound.getCompoundTag("fluidTank"));
-        //EU_Stored=nbtTagCompound.getInteger("EU");
+        dirScanning=nbtTagCompound.getInteger("dirscanning");
+        posScanning=new BlockPos(nbtTagCompound.getInteger("posscanningx"),nbtTagCompound.getInteger("posscanningy"),nbtTagCompound.getInteger("posscanningz"));
+        hullChangei=nbtTagCompound.getInteger("hullchangei");
+        assemblePercent=nbtTagCompound.getInteger("assemblepercent");
+        hullsPos=arrtoPosList(nbtTagCompound.getIntArray("hullspos"));
+        energyPos=arrtoPosList(nbtTagCompound.getIntArray("energypos"));
+        //ic2EnergySink.readFromNBT(nbtTagCompound);
+        //super.readFromNBT(nbtTagCompound);
+        //this.fluidTank.readFromNBT(nbtTagCompound.getCompoundTag("fluidTank"));
+        EU_Stored=nbtTagCompound.getInteger("EU");
     }
     @Override
     public Packet getDescriptionPacket() {
@@ -291,7 +459,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
         readFromNBT(pkt.getNbtCompound());
     }
 
-
+    /*
     public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
         return this.canFill(from, resource.getFluid())?fluidTank.fill(resource, doFill):0;
     }
@@ -317,12 +485,27 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory,IFluid
     public FluidTankInfo[] getTankInfo(EnumFacing from) {
         return new FluidTankInfo[]{fluidTank.getInfo()};
     }
-
+*/
     public void startScan(){
-        if(!this.isOn){
-            this.isOn=true;
-            this.isScanning=true;
-            this.notifyRefresh=1;
+        if(!worldObj.isRemote){
+            if(!this.isOn){
+
+                this.isOn=true;
+                this.isScanning=true;
+                this.hullChangei=0;
+
+                //worldObj.setBlockState(pos.add(dirVec[dirLeft[dir]]),AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
+                this.notifyRefresh=1;
+            }
+        }else{
+            if(assemblePercent==0) {
+
+                this.isOn = true;
+                this.isScanning = true;
+                this.hullChangei = 0;
+                //worldObj.setBlockState(pos.add(dirVec[dirLeft[dir]]),AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1));
+                this.notifyRefresh = 1;
+            }
         }
 
 

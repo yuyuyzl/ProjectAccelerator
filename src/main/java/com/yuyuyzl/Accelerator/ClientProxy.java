@@ -15,12 +15,15 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class ClientProxy extends CommonProxy{
     public void preInit(){
         super.preInit();
-        Item itemblock=GameRegistry.findItem("acceleratormod","Acc_MainBlock");
+        Item itemblockmain=GameRegistry.findItem("acceleratormod","Acc_MainBlock");
         ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("acceleratormod:Acc_MainBlock", "inventory");
-        Item itemblock1=GameRegistry.findItem("acceleratormod","Acc_Hull");
+        Item itemblockhull=GameRegistry.findItem("acceleratormod","Acc_Hull");
         ModelResourceLocation itemModelResourceLocation1 = new ModelResourceLocation("acceleratormod:Acc_Hull", "inventory");
-        ModelLoader.setCustomModelResourceLocation(itemblock,0,itemModelResourceLocation);
-        ModelLoader.setCustomModelResourceLocation(itemblock1,0,itemModelResourceLocation1);
+        Item itemblockenergy=GameRegistry.findItem("acceleratormod","Acc_Energy");
+        ModelResourceLocation itemModelResourceLocation2 = new ModelResourceLocation("acceleratormod:Acc_Energy", "inventory");
+        ModelLoader.setCustomModelResourceLocation(itemblockmain,0,itemModelResourceLocation);
+        ModelLoader.setCustomModelResourceLocation(itemblockhull,0,itemModelResourceLocation1);
+        ModelLoader.setCustomModelResourceLocation(itemblockenergy,0,itemModelResourceLocation2);
 }
     public void init(){
         super.init();

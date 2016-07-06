@@ -31,10 +31,29 @@ public class GuiAccMain extends GuiContainer{
         Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("acceleratormod","textures/GUIAccMainbg.png"));
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-        fontRendererObj.drawString("P.A. Controller Ver."+ AcceleratorMod.VERSION,guiLeft+24,guiTop+21, Color.white.getRGB());
-        fontRendererObj.drawString("Energy : "+String.valueOf(te.EU_Stored)+" EU",guiLeft+24,guiTop+31, Color.white.getRGB());
-        fontRendererObj.drawString("UU Matter : "+String.valueOf(te.UU_Stored)+" mB",guiLeft+24,guiTop+41, Color.white.getRGB());
 
+        fontRendererObj.drawString("P.A. Controller Ver."+ AcceleratorMod.VERSION,guiLeft+24,guiTop+21, Color.white.getRGB());
+        if(te.isOn) {
+            if (!te.isScanning) {
+                if (te.assemblePercent==-3){
+                    fontRendererObj.drawString("Fatal Error Occurred.", guiLeft + 24, guiTop + 31, Color.white.getRGB());
+
+                }else {
+                    fontRendererObj.drawString("Energy : " + String.valueOf(te.EU_Stored) + " EU", guiLeft + 24, guiTop + 31, Color.white.getRGB());
+                    fontRendererObj.drawString("UU Matter : " + String.valueOf(te.UU_Stored) + " mB", guiLeft + 24, guiTop + 41, Color.white.getRGB());
+                }
+            }else {
+                fontRendererObj.drawString("Scanning.", guiLeft + 24, guiTop + 31, Color.white.getRGB());
+                if(te.assemblePercent==0){
+                    fontRendererObj.drawString("Detecting route.", guiLeft + 24, guiTop + 41, Color.white.getRGB());
+                }else {
+                    fontRendererObj.drawString("Assembling. "+String.valueOf(te.assemblePercent)+"% finished.", guiLeft + 24, guiTop + 41, Color.white.getRGB());
+                }
+            }
+        }else {
+            fontRendererObj.drawString("Idle.", guiLeft + 24, guiTop + 31, Color.white.getRGB());
+            fontRendererObj.drawString("Ready to Scan.", guiLeft + 24, guiTop + 41, Color.white.getRGB());
+        }
     }
 
     @Override

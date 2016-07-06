@@ -1,8 +1,10 @@
 package com.yuyuyzl.Accelerator;
 
+import com.yuyuyzl.Accelerator.Blocks.BlockAccEnergy;
 import com.yuyuyzl.Accelerator.Blocks.BlockAccHull;
 import com.yuyuyzl.Accelerator.Blocks.BlockAccMain;
 import com.yuyuyzl.Accelerator.Network.NetworkHandler;
+import com.yuyuyzl.Accelerator.TileEntities.TEAccEnergy;
 import com.yuyuyzl.Accelerator.TileEntities.TEAccMain;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,12 +18,16 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class CommonProxy {
     public Block blockAccMain;
     public Block blockAccHull;
+    public Block blockAccEnergy;
     public void preInit(){
         blockAccMain=new BlockAccMain().setUnlocalizedName("Acc_MainBlock");
         GameRegistry.registerBlock(blockAccMain,"Acc_MainBlock");
         blockAccHull=new BlockAccHull().setUnlocalizedName("Acc_Hull");
         GameRegistry.registerBlock(blockAccHull,"Acc_Hull");
+        blockAccEnergy=new BlockAccEnergy().setUnlocalizedName("Acc_Energy");
+        GameRegistry.registerBlock(blockAccEnergy,"Acc_Energy");
         GameRegistry.registerTileEntity(TEAccMain.class,"Acc_MainBlock");
+        GameRegistry.registerTileEntity(TEAccEnergy.class,"Acc_Energy");
         NetworkRegistry.INSTANCE.registerGuiHandler(AcceleratorMod.instance,GUIHandler.getInstance());
         NetworkHandler.init();
     }

@@ -19,6 +19,7 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -47,8 +48,9 @@ public class BlockAccMain extends BlockContainer{
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
         // Uses the gui handler registered to your mod to open the gui for the given gui id
         // open on the server side only  (not sure why you shouldn't open client side too... vanilla doesn't, so we better not either)
-        if (worldIn.isRemote) return true;
 
+        if (worldIn.isRemote) return true;
+        //playerIn.addChatComponentMessage(new ChatComponentText("hahahahah"));
         playerIn.openGui(AcceleratorMod.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
         return true;
     }
@@ -153,7 +155,7 @@ public class BlockAccMain extends BlockContainer{
     {
         TEAccMain te=(TEAccMain) worldIn.getTileEntity(pos);
         if (te!=null){
-            System.out.println("called gas,"+ java.lang.String.valueOf(te.isOn));
+            //System.out.println("called gas,"+ java.lang.String.valueOf(te.isOn));
             return state.withProperty(DIR,te.dir).withProperty(ON,te.isOn?1:0);
         }
         return state;

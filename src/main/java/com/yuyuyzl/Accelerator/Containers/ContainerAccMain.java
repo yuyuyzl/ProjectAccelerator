@@ -46,7 +46,7 @@ public class ContainerAccMain extends Container{
             }
         }
         final int TEST_SLOT_XPOS = 60;
-        final int TEST_SLOT_YPOS = 60;
+        final int TEST_SLOT_YPOS = 90;
         addSlotToContainer(new SlotTest(te,0,TEST_SLOT_XPOS,TEST_SLOT_YPOS));
 
     }
@@ -65,6 +65,21 @@ public class ContainerAccMain extends Container{
         super.updateProgressBar(id, data);
         if(id==0)te.EU_Stored=data;
         if(id==1)te.UU_Stored=data;
+        if(id==2){
+            te.assemblePercent=data;
+            if (data==-1||data==-3){
+                te.isScanning=false;
+                te.isOn=true;
+            }
+            else
+            if (data==-2){
+                te.isOn=false;
+                te.isScanning=false;
+            }else {
+                te.isOn = true;
+                te.isScanning = true;
+            }
+        }
     }
 
     @Override
@@ -75,6 +90,8 @@ public class ContainerAccMain extends Container{
             ICrafting icrafting = (ICrafting)this.crafters.get(i);
             icrafting.sendProgressBarUpdate(this,0,te.EU_Stored);
             icrafting.sendProgressBarUpdate(this,1,te.UU_Stored);
+            icrafting.sendProgressBarUpdate(this,2,te.assemblePercent);
+
 
         }
 
