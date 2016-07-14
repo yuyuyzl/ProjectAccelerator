@@ -168,10 +168,10 @@ public class MBEConfiguration {
     final double MY_DOUBLE_MIN_VALUE = 0.0;
     final double MY_DOUBLE_MAX_VALUE = 1.0;
     final double MY_DOUBLE_DEFAULT_VALUE = 0.80;
-    Property propMyDouble = config.get(CATEGORY_NAME_GENERAL, "myDouble",
-                                       MY_DOUBLE_DEFAULT_VALUE, "Configuration double (myDouble)",
+    Property propMyDouble = config.get(CATEGORY_NAME_GENERAL, "kAcceleration",
+                                       MY_DOUBLE_DEFAULT_VALUE, "Configuration double (kAcceleration)",
                                        MY_DOUBLE_MIN_VALUE, MY_DOUBLE_MAX_VALUE);
-    propMyDouble.setLanguageKey("gui.mbe70_configuration.myDouble");
+    propMyDouble.setLanguageKey("gui.mbe70_configuration.kAcceleration");
 
     // string
     final String MY_STRING_DEFAULT_VALUE = "default";

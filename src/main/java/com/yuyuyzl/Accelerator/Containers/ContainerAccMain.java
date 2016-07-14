@@ -80,6 +80,7 @@ public class ContainerAccMain extends Container{
                 te.isScanning = true;
             }
         }
+        if(id==3)te.progressInt=data;
     }
 
     @Override
@@ -91,7 +92,7 @@ public class ContainerAccMain extends Container{
             icrafting.sendProgressBarUpdate(this,0,te.EU_Stored);
             icrafting.sendProgressBarUpdate(this,1,te.UU_Stored);
             icrafting.sendProgressBarUpdate(this,2,te.assemblePercent);
-
+            icrafting.sendProgressBarUpdate(this,3,te.progressInt);
 
         }
 

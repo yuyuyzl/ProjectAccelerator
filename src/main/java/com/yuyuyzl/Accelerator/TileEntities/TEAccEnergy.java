@@ -12,7 +12,7 @@ import net.minecraft.util.ITickable;
  * Created by user on 2016/7/5.
  */
 public class TEAccEnergy extends TileEntity implements ITickable {
-    private BasicSink ic2EnergySink = new BasicSink(this,Integer.MAX_VALUE,5);
+    private BasicSink ic2EnergySink = new BasicSink(this,0,5);
     public boolean isOn=false;
     @Override
     public void writeToNBT(NBTTagCompound compound) {
@@ -30,7 +30,10 @@ public class TEAccEnergy extends TileEntity implements ITickable {
 
     @Override
     public void update() {
+        //ic2EnergySink.
+        if (isOn)ic2EnergySink.setCapacity(Integer.MAX_VALUE);else ic2EnergySink.setCapacity(0);
         ic2EnergySink.update();
+
     }
     public double getEnergyStored(){
         return ic2EnergySink.getEnergyStored();
@@ -46,6 +49,7 @@ public class TEAccEnergy extends TileEntity implements ITickable {
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.getNbtCompound());
+        //if(worldObj.isRemote)worldObj.markBlockForUpdate(this.pos);
     }
     public int getEnergy(int amount){
         if (ic2EnergySink.getEnergyStored()>=amount){
@@ -56,5 +60,17 @@ public class TEAccEnergy extends TileEntity implements ITickable {
             ic2EnergySink.useEnergy(ic2EnergySink.getEnergyStored());
             return n;
         }
+    }
+
+    @Override
+    public void invalidate() {
+        ic2EnergySink.invalidate();
+        super.invalidate();
+    }
+
+    @Override
+    public void onChunkUnload() {
+        ic2EnergySink.onChunkUnload();
+        super.onChunkUnload();
     }
 }

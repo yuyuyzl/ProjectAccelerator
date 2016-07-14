@@ -21,7 +21,7 @@ public class StartupCommon
     System.out.println("MBE70: myInteger=" + MBEConfiguration.myInteger
                                + "; myBoolean=" + MBEConfiguration.myBoolean
                                + "; myString=" + MBEConfiguration.myString);
-    System.out.println("MBE70: myDouble=" + MBEConfiguration.myDouble
+    System.out.println("MBE70: kAcceleration=" + MBEConfiguration.myDouble
                                + "; myColour=" + MBEConfiguration.myColour);
     System.out.print("MBE70: myIntList=");
     for (int value : MBEConfiguration.myIntList) {

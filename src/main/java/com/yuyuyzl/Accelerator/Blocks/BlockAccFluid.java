@@ -1,9 +1,7 @@
 package com.yuyuyzl.Accelerator.Blocks;
 
-import com.yuyuyzl.Accelerator.TileEntities.TEAccEnergy;
-import net.minecraft.block.Block;
+import com.yuyuyzl.Accelerator.TileEntities.TEAccFluid;
 import net.minecraft.block.BlockContainer;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
@@ -22,15 +20,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * Created by user on 2016/7/5.
+ * Created by user on 2016/7/14.
  */
-public class BlockAccEnergy extends BlockContainer{
-    public BlockAccEnergy(){
+public class BlockAccFluid extends BlockContainer{
+    public BlockAccFluid(){
         super(Material.iron);
         this.setCreativeTab(CreativeTabs.tabBlock);
         this.setHardness(0.8F);
     }
-
     public static final PropertyInteger ON = PropertyInteger.create("on", 0, 1);
 
     @Override
@@ -67,7 +64,8 @@ public class BlockAccEnergy extends BlockContainer{
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
         //if(!worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccEnergy)worldIn.getTileEntity(pos)).getEnergyStored())));
-        if(worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccEnergy)worldIn.getTileEntity(pos)).isOn)));
+        //if(worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccEnergy)worldIn.getTileEntity(pos)).isOn)));
+        if(!worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccFluid)worldIn.getTileEntity(pos)).getStorage())));
         return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
     }
 
@@ -89,13 +87,12 @@ public class BlockAccEnergy extends BlockContainer{
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new TEAccEnergy();
+        return new TEAccFluid();
     }
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return getDefaultState().withProperty(ON,((TEAccEnergy)worldIn.getTileEntity(pos)).isOn?1:0);
+        return getDefaultState().withProperty(ON,((TEAccFluid)worldIn.getTileEntity(pos)).isOn?1:0);
     }
-
 
 }

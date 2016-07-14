@@ -1,10 +1,12 @@
 package com.yuyuyzl.Accelerator;
 
 import com.yuyuyzl.Accelerator.Blocks.BlockAccEnergy;
+import com.yuyuyzl.Accelerator.Blocks.BlockAccFluid;
 import com.yuyuyzl.Accelerator.Blocks.BlockAccHull;
 import com.yuyuyzl.Accelerator.Blocks.BlockAccMain;
 import com.yuyuyzl.Accelerator.Network.NetworkHandler;
 import com.yuyuyzl.Accelerator.TileEntities.TEAccEnergy;
+import com.yuyuyzl.Accelerator.TileEntities.TEAccFluid;
 import com.yuyuyzl.Accelerator.TileEntities.TEAccMain;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +21,7 @@ public class CommonProxy {
     public Block blockAccMain;
     public Block blockAccHull;
     public Block blockAccEnergy;
+    public Block blockAccFluid;
     public void preInit(){
         blockAccMain=new BlockAccMain().setUnlocalizedName("Acc_MainBlock");
         GameRegistry.registerBlock(blockAccMain,"Acc_MainBlock");
@@ -26,10 +29,14 @@ public class CommonProxy {
         GameRegistry.registerBlock(blockAccHull,"Acc_Hull");
         blockAccEnergy=new BlockAccEnergy().setUnlocalizedName("Acc_Energy");
         GameRegistry.registerBlock(blockAccEnergy,"Acc_Energy");
+        blockAccFluid=new BlockAccFluid().setUnlocalizedName("Acc_Fluid");
+        GameRegistry.registerBlock(blockAccFluid,"Acc_Fluid");
         GameRegistry.registerTileEntity(TEAccMain.class,"Acc_MainBlock");
         GameRegistry.registerTileEntity(TEAccEnergy.class,"Acc_Energy");
+        GameRegistry.registerTileEntity(TEAccFluid.class,"Acc_Fluid");
         NetworkRegistry.INSTANCE.registerGuiHandler(AcceleratorMod.instance,GUIHandler.getInstance());
         NetworkHandler.init();
+        Config.preInit();
     }
     public void init(){
 

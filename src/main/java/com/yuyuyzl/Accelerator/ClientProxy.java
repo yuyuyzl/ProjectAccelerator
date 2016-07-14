@@ -21,9 +21,13 @@ public class ClientProxy extends CommonProxy{
         ModelResourceLocation itemModelResourceLocation1 = new ModelResourceLocation("acceleratormod:Acc_Hull", "inventory");
         Item itemblockenergy=GameRegistry.findItem("acceleratormod","Acc_Energy");
         ModelResourceLocation itemModelResourceLocation2 = new ModelResourceLocation("acceleratormod:Acc_Energy", "inventory");
+        Item itemblockfluid=GameRegistry.findItem("acceleratormod","Acc_Fluid");
+        ModelResourceLocation itemModelResourceLocation3 = new ModelResourceLocation("acceleratormod:Acc_Fluid", "inventory");
         ModelLoader.setCustomModelResourceLocation(itemblockmain,0,itemModelResourceLocation);
         ModelLoader.setCustomModelResourceLocation(itemblockhull,0,itemModelResourceLocation1);
         ModelLoader.setCustomModelResourceLocation(itemblockenergy,0,itemModelResourceLocation2);
+        ModelLoader.setCustomModelResourceLocation(itemblockfluid,0,itemModelResourceLocation3);
+        Config.clientPreInit();
 }
     public void init(){
         super.init();

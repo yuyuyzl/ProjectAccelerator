@@ -39,7 +39,7 @@ public class GuiAccMain extends GuiContainer{
                     fontRendererObj.drawString("Fatal Error Occurred.", guiLeft + 24, guiTop + 31, Color.white.getRGB());
 
                 }else {
-                    fontRendererObj.drawString("Energy : " + String.valueOf(te.EU_Stored) + " EU", guiLeft + 24, guiTop + 31, Color.white.getRGB());
+                    fontRendererObj.drawString("Progress : " + String.valueOf((int)(te.progressInt/100))+(te.progressInt%100<10?".0":".")+ String.valueOf(te.progressInt%100)+ "%", guiLeft + 24, guiTop + 31, Color.white.getRGB());
                     fontRendererObj.drawString("UU Matter : " + String.valueOf(te.UU_Stored) + " mB", guiLeft + 24, guiTop + 41, Color.white.getRGB());
                 }
             }else {
