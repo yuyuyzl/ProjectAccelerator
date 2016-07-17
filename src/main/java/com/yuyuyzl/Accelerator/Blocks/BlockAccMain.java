@@ -9,7 +9,7 @@ import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,14 +18,17 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 
 /**
@@ -34,8 +37,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class BlockAccMain extends BlockContainer{
 
     public BlockAccMain(){
-        super(Material.iron);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.IRON);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         this.setHardness(0.8F);
     }
 
@@ -44,16 +47,15 @@ public class BlockAccMain extends BlockContainer{
         return new TEAccMain();
     }
     public static final int GUI_ID=0;
-    @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
-        // Uses the gui handler registered to your mod to open the gui for the given gui id
-        // open on the server side only  (not sure why you shouldn't open client side too... vanilla doesn't, so we better not either)
 
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (worldIn.isRemote) return true;
         //playerIn.addChatComponentMessage(new ChatComponentText("hahahahah"));
         playerIn.openGui(AcceleratorMod.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
-        return true;
-    }
+        return true;    }
+
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
@@ -95,16 +97,16 @@ public class BlockAccMain extends BlockContainer{
 
     // the block will render in the SOLID layer.  See http://greyminecraftcoder.blogspot.co.at/2014/12/block-rendering-18.html for more information.
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.SOLID;
+        return BlockRenderLayer.SOLID;
     }
     public static final PropertyInteger DIR = PropertyInteger.create("dir", 0, 3);
     public static final PropertyInteger ON = PropertyInteger.create("on", 0, 1);
     @Override
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {DIR,ON});
+        return new BlockStateContainer(this, new IProperty[] {DIR,ON});
     }
     @Override
     public IBlockState getStateFromMeta(int meta)
@@ -162,22 +164,27 @@ public class BlockAccMain extends BlockContainer{
     }
 
     // used by the renderer to control lighting and visibility of other blocks.
-    // set to false because this block doesn't fill the entire 1x1x1 space
+    // set to true because this block is opaque and occupies the entire 1x1x1 space
+    // not strictly required because the default (super method) is true
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return true;
     }
 
     // used by the renderer to control lighting and visibility of other blocks, also by
     // (eg) wall or fence to control whether the fence joins itself to this block
-    // set to false because this block doesn't fill the entire 1x1x1 space
+    // set to true because this block occupies the entire 1x1x1 space
+    // not strictly required because the default (super method) is true
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return true;
     }
+
+    // render using a BakedModel (mbe01_block_simple.json --> mbe01_block_simple_model.json)
+    // not strictly required because the default (super method) is 3.
     @Override
-    public int getRenderType() {
-        return 3;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.MODEL;
     }
 
 }

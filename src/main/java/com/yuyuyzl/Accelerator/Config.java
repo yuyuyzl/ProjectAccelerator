@@ -265,10 +265,10 @@ public class Config {
          */
         @SubscribeEvent(priority = EventPriority.NORMAL)
         public void onEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
-            if (AcceleratorMod.MODID.equals(event.modID)
-                    && !event.isWorldRunning) {
-                if (event.configID.equals(CATEGORY_NAME_GENERAL)
-                        || event.configID.equals(CATEGORY_NAME_OTHER) ) {
+            if (AcceleratorMod.MODID.equals(event.getModID())
+                    && !event.isWorldRunning()) {
+                if (event.getConfigID().equals(CATEGORY_NAME_GENERAL)
+                        || event.getConfigID().equals(CATEGORY_NAME_OTHER) ) {
                     syncFromGUI();
                 }
             }

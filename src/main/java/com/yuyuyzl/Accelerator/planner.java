@@ -1,6 +1,6 @@
 package com.yuyuyzl.Accelerator;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,7 @@ import com.yuyuyzl.Accelerator.TileEntities.TEAccMain;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraftforge.fml.relauncher.Side;
@@ -86,9 +86,11 @@ public class ContainerAccMain extends Container{
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
+
         // go through the list of crafters (players using this container) and update them if necessary
-        for (int i = 0; i < this.crafters.size(); ++i) {
-            ICrafting icrafting = (ICrafting)this.crafters.get(i);
+        for (int i = 0; i < this.listeners.size(); ++i) {
+            IContainerListener icrafting =this.listeners.get(i);
+            //ICrafting icrafting = (ICrafting)this.crafters.get(i);
             icrafting.sendProgressBarUpdate(this,0,te.EU_Stored);
             icrafting.sendProgressBarUpdate(this,1,te.UU_Stored);
             icrafting.sendProgressBarUpdate(this,2,te.assemblePercent);

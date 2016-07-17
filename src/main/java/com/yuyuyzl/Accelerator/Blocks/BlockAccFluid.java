@@ -5,15 +5,13 @@ import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -24,30 +22,24 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class BlockAccFluid extends BlockContainer{
     public BlockAccFluid(){
-        super(Material.iron);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.IRON);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         this.setHardness(0.8F);
     }
     public static final PropertyInteger ON = PropertyInteger.create("on", 0, 1);
 
     @Override
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {ON});
+        return new BlockStateContainer(this, new IProperty[] {ON});
     }
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.SOLID;
+        return BlockRenderLayer.SOLID;
     }
 
-    // used by the renderer to control lighting and visibility of other blocks.
-    // set to true because this block is opaque and occupies the entire 1x1x1 space
-    // not strictly required because the default (super method) is true
-    @Override
-    public boolean isOpaqueCube() {
-        return true;
-    }
+
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
@@ -61,12 +53,13 @@ public class BlockAccFluid extends BlockContainer{
         return 0;
 //		return ((Integer)state.getValue(BURNING_SIDES_COUNT)).intValue();
     }
+
+    // used by the renderer to control lighting and visibility of other blocks.
+    // set to true because this block is opaque and occupies the entire 1x1x1 space
+    // not strictly required because the default (super method) is true
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
-        //if(!worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccEnergy)worldIn.getTileEntity(pos)).getEnergyStored())));
-        //if(worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccEnergy)worldIn.getTileEntity(pos)).isOn)));
-        if(!worldIn.isRemote)playerIn.addChatComponentMessage(new ChatComponentText(String.valueOf(((TEAccFluid)worldIn.getTileEntity(pos)).getStorage())));
-        return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
+    public boolean isOpaqueCube(IBlockState state) {
+        return true;
     }
 
     // used by the renderer to control lighting and visibility of other blocks, also by
@@ -74,15 +67,15 @@ public class BlockAccFluid extends BlockContainer{
     // set to true because this block occupies the entire 1x1x1 space
     // not strictly required because the default (super method) is true
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return true;
     }
 
     // render using a BakedModel (mbe01_block_simple.json --> mbe01_block_simple_model.json)
     // not strictly required because the default (super method) is 3.
     @Override
-    public int getRenderType() {
-        return 3;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.MODEL;
     }
 
     @Override

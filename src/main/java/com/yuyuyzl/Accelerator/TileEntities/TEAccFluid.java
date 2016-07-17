@@ -1,6 +1,8 @@
 package com.yuyuyzl.Accelerator.TileEntities;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -46,11 +48,12 @@ public class TEAccFluid extends TileEntity implements IFluidHandler,ITickable {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound compound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         NBTTagCompound fluidTankTag = new NBTTagCompound();
         this.fluidTank.writeToNBT(fluidTankTag);
         compound.setTag("fluidTank", fluidTankTag);
         compound.setBoolean("ison",isOn);
+        return compound;
     }
     public int getStorage(){
         return fluidTank.getFluidAmount();
@@ -68,5 +71,15 @@ public class TEAccFluid extends TileEntity implements IFluidHandler,ITickable {
                 //System.out.println(fluidTank.getFluidAmount());
             }
         }
+    }
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(this.pos,0,this.writeToNBT(new NBTTagCompound()));
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        super.onDataPacket(net, pkt);
+        readFromNBT(pkt.getNbtCompound());
     }
 }

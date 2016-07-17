@@ -10,9 +10,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.*;
+import net.minecraft.util.text.ITextComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,7 +157,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
                 if (worldObj.getBlockState(hullsPos.get(hullChangei * 97 % hullsPos.size())) != AcceleratorMod.proxy.blockAccHull.getStateFromMeta(1)) {
                     isOn = true;
                     isScanning = false;
-                    if (worldObj.isRemote) worldObj.markBlockForUpdate(pos);
+                    if (worldObj.isRemote) this.markDirty();
                     assemblePercent = -3;
                     return;
                 }
@@ -167,7 +170,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
                 }else {
                     isOn=true;
                     isScanning=false;
-                    if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+                    if(worldObj.isRemote)this.markDirty();
                     assemblePercent=-3;
                     return;
                 }
@@ -220,7 +223,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
                if (!worldObj.isRemote) doScan();
         }
         if (notifyRefresh>0){
-            if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+            if(worldObj.isRemote)this.markDirty();
             assemblePercent=0;
             posScanning=pos.add(dirVec[dir]).add(dirVec[dir]);
             dirScanning=dir;
@@ -347,7 +350,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
                 for (BlockPos p:energyPos) {
                     TEAccEnergy te= (TEAccEnergy) worldObj.getTileEntity(p);
                     te.isOn=true;
-                    worldObj.markBlockForUpdate(p);
+                    te.markDirty();
                 }
                 drag = calculateDrag(routePos);
             }
@@ -357,7 +360,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
             }else {
                 isOn=true;
                 isScanning=false;
-                if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+                if(worldObj.isRemote)this.markDirty();
                 assemblePercent=-3;
                 return;
             }
@@ -373,7 +376,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
             System.out.println(String.valueOf(isScanning));
             isOn=false;
             isScanning=false;
-            if(worldObj.isRemote)worldObj.markBlockForUpdate(pos);
+            if(worldObj.isRemote)this.markDirty();
             assemblePercent=-2;
         }
         }
@@ -416,9 +419,11 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
     }
 
     @Override
-    public IChatComponent getDisplayName() {
-        return this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName());
+    public ITextComponent getDisplayName() {
+        return null;
     }
+
+
     private int[] posListtoArr(List<BlockPos> posList){
         int[] arr=new int[posList.size()*3];
         for(int i=0;i<posList.size();i++){
@@ -434,7 +439,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
         return posList;
     }
     @Override
-    public void writeToNBT(NBTTagCompound parentNBTTagCompound)
+    public NBTTagCompound writeToNBT(NBTTagCompound parentNBTTagCompound)
     {
         super.writeToNBT(parentNBTTagCompound); // The super call is required to save and load the tiles location
 
@@ -480,6 +485,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
         //NBTTagCompound fluidTankTag = new NBTTagCompound();
         //this.fluidTank.writeToNBT(fluidTankTag);
         //parentNBTTagCompound.setTag("fluidTank", fluidTankTag);
+        return parentNBTTagCompound;
     }
 
     // This is where you load the data that you saved in writeToNBT
@@ -518,6 +524,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
         EU_Stored=nbtTagCompound.getInteger("EU");
         UU_Stored=nbtTagCompound.getInteger("UU");
     }
+    /*
     @Override
     public Packet getDescriptionPacket() {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
@@ -529,7 +536,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.getNbtCompound());
-    }
+    }*/
 
     /*
     public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
@@ -602,7 +609,16 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
 
 
     }
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(this.pos,0,this.writeToNBT(new NBTTagCompound()));
+    }
 
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        super.onDataPacket(net, pkt);
+        readFromNBT(pkt.getNbtCompound());
+    }
 
 
 }

@@ -2,7 +2,7 @@ package com.yuyuyzl.Accelerator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -39,7 +39,7 @@ public class ClientProxy extends CommonProxy{
     public boolean playerIsInCreativeMode(EntityPlayer player) {
         if (player instanceof EntityPlayerMP) {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP)player;
-            return entityPlayerMP.theItemInWorldManager.isCreative();
+            return entityPlayerMP.isCreative();
         } else if (player instanceof EntityPlayerSP) {
             return Minecraft.getMinecraft().playerController.isInCreativeMode();
         }

@@ -4,14 +4,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -21,15 +23,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class BlockAccHull extends Block{
     public BlockAccHull(){
-        super(Material.iron);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.IRON);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         this.setHardness(0.8F);
     }
     public static final PropertyInteger ON = PropertyInteger.create("on", 0, 1);
     @Override
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {ON});
+        return new BlockStateContainer(this, new IProperty[] {ON});
     }
     @Override
     public IBlockState getStateFromMeta(int meta) {
@@ -45,16 +47,16 @@ public class BlockAccHull extends Block{
         super.breakBlock(worldIn, pos, state);
     }
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.SOLID;
+        return BlockRenderLayer.SOLID;
     }
 
     // used by the renderer to control lighting and visibility of other blocks.
     // set to true because this block is opaque and occupies the entire 1x1x1 space
     // not strictly required because the default (super method) is true
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return true;
     }
 
@@ -63,14 +65,15 @@ public class BlockAccHull extends Block{
     // set to true because this block occupies the entire 1x1x1 space
     // not strictly required because the default (super method) is true
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return true;
     }
 
     // render using a BakedModel (mbe01_block_simple.json --> mbe01_block_simple_model.json)
     // not strictly required because the default (super method) is 3.
     @Override
-    public int getRenderType() {
-        return 3;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.MODEL;
     }
+
 }

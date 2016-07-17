@@ -3,7 +3,7 @@ package com.yuyuyzl.Accelerator.Network;
 import com.yuyuyzl.Accelerator.TileEntities.TEAccMain;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
