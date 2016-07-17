@@ -468,6 +468,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
         parentNBTTagCompound.setInteger("assemblepercent",assemblePercent);
         parentNBTTagCompound.setIntArray("hullspos",posListtoArr(hullsPos));
         parentNBTTagCompound.setIntArray("energypos",posListtoArr(energyPos));
+        parentNBTTagCompound.setIntArray("fluidpos",posListtoArr(fluidPos));
         parentNBTTagCompound.setInteger("EU",EU_Stored);
         parentNBTTagCompound.setInteger("UU",UU_Stored);
         parentNBTTagCompound.setDouble("drag", drag);
@@ -508,6 +509,7 @@ public class TEAccMain extends TileEntity implements ITickable,IInventory{
         assemblePercent=nbtTagCompound.getInteger("assemblepercent");
         hullsPos=arrtoPosList(nbtTagCompound.getIntArray("hullspos"));
         energyPos=arrtoPosList(nbtTagCompound.getIntArray("energypos"));
+        fluidPos=arrtoPosList(nbtTagCompound.getIntArray("fluidpos"));
         drag =nbtTagCompound.getDouble("drag");
         accProgress=nbtTagCompound.getDouble("accprogress");
         //ic2EnergySink.readFromNBT(nbtTagCompound);
